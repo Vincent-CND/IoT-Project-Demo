@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Main</title>
   <link rel="stylesheet" href="/styles/main.css" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="deploy.js"></script>
 </head>
 
@@ -15,15 +17,21 @@
     <section>
       <h3 class="section-title">DHCP</h3>
       <div class="card">
+
+        <div class="radio-grid-2">
+          <label class="radio"><input type="radio" name="device" id="dhcprouter"> Router</label>
+          <label class="radio"><input type="radio" name="device" id="dhcpL3"> Layer 3 Switch</label>
+        </div>
+
         <div class="grid-2">
-          <input class="pill" type="text" placeholder="POOL">
-          <input class="pill" type="text" placeholder="Network">
-          <input class="pill" type="text" placeholder="Default Router">
-          <input class="pill" type="text" placeholder="DNS Server">
+          <input class="pill" type="text" placeholder="POOL" id="pool">
+          <input class="pill" type="text" placeholder="Network" id="Network">
+          <input class="pill" type="text" placeholder="Default Router" id="defaultRouter">
+          <input class="pill" type="text" placeholder="DNS Server" id="dnsServer">
         </div>
 
         <div class="center-row">
-          <input class="pill" type="text" placeholder="IP DHCP Excluded">
+          <input class="pill" type="text" placeholder="IP DHCP Excluded" id="excluded">
         </div>
       </div>
     </section>
@@ -32,11 +40,31 @@
     <section>
       <h3 class="section-title">VLAN</h3>
 
-      <div class="card">
+      <div class="card">  
+        <div class="check-row">
 
+          <label class="check">
+            <input type="checkbox" id="vlanchooseL3">  
+            Layer 3 Switch
+          </label>
+
+          <label class="check">
+            <input type="checkbox" id="vlanchooseSw1">
+            Switch 1
+          </label>
+
+          <label class="check">
+            <input type="checkbox" id="vlanchooseSw2">
+            Switch 2 
+          </label>
+          
+          <br> 
+          <br>
+
+        </div>
         <div class="grid-2">
-          <input class="pill" type="text" placeholder="VLAN Number">
-          <input class="pill" type="text" placeholder="Name">
+          <input class="pill" type="text" placeholder="VLAN Number" id="vlanNum">
+          <input class="pill" type="text" placeholder="Name" id="vlanName">
         </div>
 
         <!-- CHECKBOX -->
@@ -74,15 +102,15 @@
       <h3 class="section-title">User Create</h3>
       <div class="card">
         <div class="radio-grid-2">
-          <label class="radio"><input type="radio" name="device"> Router</label>
-          <label class="radio"><input type="radio" name="device"> Switch - 1</label>
-          <label class="radio"><input type="radio" name="device"> L3 Switch</label>
-          <label class="radio"><input type="radio" name="device"> Switch - 2</label>
+          <label class="radio"><input type="radio" name="device" id="router"> Router</label>
+          <label class="radio"><input type="radio" name="device" id="firstSwitch"> Switch - 1</label>
+          <label class="radio"><input type="radio" name="device" id="l3Switch"> L3 Switch</label>
+          <label class="radio"><input type="radio" name="device" id="secondSwitch"> Switch - 2</label>
         </div>
 
         <div class="grid-2">
-          <input class="pill" type="text" placeholder="User Name">
-          <input class="pill" type="password" placeholder="Secret">
+          <input class="pill" type="text" placeholder="User Name" id="userName">
+          <input class="pill" type="password" placeholder="Secret" id="secret">
         </div>
       </div>
     </section>
@@ -91,11 +119,17 @@
     <section>
       <h3 class="section-title">OSPF</h3>
       <div class="card">
+
+        <div class="radio-grid-2">
+          <label class="radio"><input type="radio" name="device" id="ospfrouter"> Router</label>
+          <label class="radio"><input type="radio" name="device" id="ospfL3"> Layer 3 Switch</label>
+        </div>
+
         <div class="grid-2">
-          <input class="pill" type="text" placeholder="Router ospf number">
-          <input class="pill" type="text" placeholder="Wildcard">
-          <input class="pill" type="text" placeholder="Network">
-          <input class="pill" type="text" placeholder="Area">
+          <input class="pill" type="text" placeholder="Router ospf number" id="ospfNum">
+          <input class="pill" type="text" placeholder="Wildcard" id="wildcard">
+          <input class="pill" type="text" placeholder="Network" id="network">
+          <input class="pill" type="text" placeholder="Area" id="area">
         </div>
       </div>
     </section>
@@ -104,15 +138,21 @@
     <section>
       <h3 class="section-title">NTP</h3>
       <div class="card">
+        
+        <div class="radio-grid-2">
+          <label class="radio"><input type="radio" name="device" id="ntprouter"> Router</label>
+          <label class="radio"><input type="radio" name="device" id="ntpL3"> Layer 3 Switch</label>
+        </div>
+
         <div class="center-row">
-          <input class="pill" type="text" placeholder="NTP Server">
+          <input class="pill" type="text" placeholder="NTP Server" id="ntpserver">
         </div>
       </div>
     </section>
 
     <!-- DEPLOY BUTTON -->
     <div class="deploy-container">
-      <button class="deploy-btn" type="button">Deploy</button>
+      <button class="deploy-btn" type="button" id="deployBtn">Deploy</button>
     </div>
 
   </main>
