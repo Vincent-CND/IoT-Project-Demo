@@ -36,11 +36,19 @@ app.get("/about", (req,res) => { res.render("about.ejs") })
 app.post("/deploy", (req, res) => {
   console.log("==> /deploy called");
   console.log("body:", req.body);
+  
 
+  console.log("******")
+  
+  console.log("******")
+
+  
   const vars = {
     pool: req.body.pool_data,
     network_dhcp: req.body.network_dhcp,
     default_router: req.body.default_router,
+    dnsServer: req.body.dnsServer,
+    ipDHCPexcluded: req.body.ipDHCPexcluded,
     vlan_number: Number(req.body.vlan_number),
     vlan_name: req.body.vlan_name,
     flag_trunk: req.body.flag_trunk === true || req.body.flag_trunk === "true",
@@ -58,24 +66,25 @@ app.post("/deploy", (req, res) => {
   fs.writeFileSync(VARS_FILE, YAML.stringify(vars), "utf8");
 
   // 3) Write site.yml (test local)
-  const siteYml = `---
-- name: Test local machine
-  hosts: local
-  gather_facts: no
+//   const siteYml = `---
+// - name: Test local machine
+//   hosts: local
+//   gather_facts: no
 
-  tasks:
-    - name: Run echo command
-      command: echo "Ansible is working"
-      register: output
+//   tasks:
+//     - name: Run echo command
+//       command: echo "Ansible is working"
+//       register: output
 
-    - name: Show result
-      debug:
-        var: output.stdout
-`;
+//     - name: Show result
+//       debug:
+//         var: output.stdout
+// `;
+
 
 // const siteYml = `---
-// - name: Gather show commands
-//   hosts: ios_switches
+// - name: configure dhcp  
+//   hosts: ${req.body.dhcp_user_option.slice(4,req.body.dhcp_user_option.length)}
 //   gather_facts: no
 //   collections:
 //     - cisco.ios
@@ -95,6 +104,30 @@ app.post("/deploy", (req, res) => {
 //       debug:
 //         var: show_output.stdout_lines
 // `;
+
+const siteYml = `---
+- name: configure dhcp  
+  hosts: ${req.body.dhcp_user_option.slice(4,req.body.dhcp_user_option.length)}
+  gather_facts: no
+  collections:
+    - cisco.ios
+  
+  vars:
+    dhcp_pool: ${req.body.pool_data}
+    network_dhcp: ${req.body.network_dhcp}
+    default_router: ${req.body.default_router}
+    ipDHCPexcluded: ${req.body.ipDHCPexcluded}
+    dns_server: ${req.body.dnsServer}
+    excluded_ip : ${req.body.ipDHCPexcluded}
+  
+  tasks:
+    - name: configure DHCP pool on specific device
+      cisco.ios.ios_config:
+        parents:
+          - ip dhcp pool {{ dhcp_pool }}
+        lines:
+
+`;
   fs.writeFileSync(PLAYBOOK, siteYml, "utf8");
 
   // 4) Build args + log

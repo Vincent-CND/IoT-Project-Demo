@@ -52,9 +52,19 @@ $(document).ready(() => {
   let endAssignPort = null;
   let trunkFlag = false;
   let userCreateOption = null;
-  let 
+  let dhcpUserOption = null;
+  let ospfUserOption = null;
+  let ntpUserOption = null;
+  let vlan_L3 = false;
+  let vlan_layer2_sw1 = false;
+  let vlan_layer2_sw2 = false;
 
   //DHCP Section
+  $("input[name='dhcp']").on("change", function () {
+    dhcpUserOption = this.id
+    console.log(dhcpUserOption);
+  });
+
   $("#pool").on("input" , function() {
     pool = $(this).val();
     console.log("pool " ,pool);
@@ -84,6 +94,21 @@ $(document).ready(() => {
   //********** */
 
   //VLAN Section
+  $("#vlanchooseL3_switch").click( () => {
+    vlan_L3 = !vlan_L3;
+    console.log("vlan_L3:", vlan_L3);
+  })
+
+  $("#vlanchooseSW1").click( () => {
+    vlan_layer2_sw1 = !vlan_layer2_sw1;
+    console.log("vlan_layer2_sw1:", vlan_layer2_sw1);
+  })
+
+  $("#vlanchooseSW2").click( () => {
+    vlan_layer2_sw2 = !vlan_layer2_sw2;
+    console.log("vlan_layer2_sw2:", vlan_layer2_sw2);
+  })
+
   $("#vlanNum").on("input" , function() { 
     vlanNum = $(this).val()
     console.log("vlan num" , vlanNum);
@@ -152,6 +177,11 @@ $(document).ready(() => {
 
   //*****/
   //ospf 
+  $("input[name='ospf']").on("change", function () {
+    ospfUserOption = this.id
+    console.log(ospfUserOption);
+  });
+
   $("#ospfNum").on("input" , function() { 
     ospfNum = $(this).val()
     console.log("ospf num" , ospfNum);
@@ -175,6 +205,11 @@ $(document).ready(() => {
   //****/
   //ntp 
 
+  $("input[name='ntp']").on("change", function () {
+    ntpUserOption = this.id
+    console.log(ntpUserOption);
+  });
+
   $("#ntpserver").on("input" , function() { 
     ntpServer = $(this).val()
     console.log("ntpserver" , ntpServer);
@@ -193,6 +228,7 @@ $(document).ready(() => {
     network_dhcp : network,
     default_router : defaultRouter,
     ipDHCPexcluded : excluded,
+    dnsServer : dnsServer,
     vlan_number : vlanNum,
     vlan_name : vlanName,
     flag_assign : flagAssign,
@@ -206,7 +242,13 @@ $(document).ready(() => {
     wildcard : wildcast,
     network_ospf : Network,
     Area : area,
-    ntp_server : ntpServer
+    ntp_server : ntpServer,
+    dhcp_user_option : dhcpUserOption,
+    ospf_user_option : ospfUserOption,
+    ntp_user_option : ntpUserOption,
+    vlan_L3 : vlan_L3,
+    vlan_layer2_sw1 : vlan_layer2_sw1,
+    vlan_layer2_sw2 : vlan_layer2_sw2
   }  
   const sendData = await axios.post("http://localhost:3000/deploy",totalConfigData)
   
