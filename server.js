@@ -2,7 +2,10 @@
 //task 2 : vlan ( l3 , 2 l2) => option can choose whatever 
 //task 3 : ospf : l3 or Router => option 1 or 2
 //task 4 : ntp : l3 or Router => option 1 or 2
-//task 5 : save the data to database => have a 
+//task 5 : save the data to database => have a
+//task 6 : write the ansible for ospf and ntp
+//task 7 : add the ask of username to do the database  
+//task 8 : redirect the user after they have deployed successfully and show the result and db in the end of main page
 
 import express from "express";
 import path from "path";
@@ -38,11 +41,6 @@ app.post("/deploy", (req, res) => {
   console.log("body:", req.body);
   
 
-  console.log("******")
-  
-  console.log("******")
-
-  
   const vars = {
     pool: req.body.pool_data,
     network_dhcp: req.body.network_dhcp,
@@ -62,48 +60,57 @@ app.post("/deploy", (req, res) => {
     ntp_server: req.body.ntp_server,
   };
 
+  let vlan_List = [];
+  let vlanPlay = "";
+
+  if (req.body.vlan_L3 == true) {
+    vlan_List.push("L3_switch");
+  }
+
+  if (req.body.vlan_layer2_sw1 == true) {
+    vlan_List.push("SW1");
+  }
+
+  if (req.body.vlan_layer2_sw2 == true) {
+    vlan_List.push("SW2");
+  }
+
+  console.log("vlan_List: ", vlan_List);
+  if (vlan_List.length > 0) {
+    const vlanHosts = vlan_List.join(",");
+    vlanPlay = `
+- name: configure vlan
+  hosts: ${vlanHosts}
+  gather_facts: no
+  collections:
+    - cisco.ios
+
+  vars:
+    vlan_id: ${req.body.vlan_number}
+    vlan_name: ${req.body.vlan_name}
+    flag_trunk: ${req.body.flag_trunk}
+    flag_assign: ${req.body.flag_assign}
+    start_port: ${req.body.start_Assign_Port}
+    end_port: ${req.body.end_Assign_Port}
+
+  tasks:
+    - name: create vlan
+      cisco.ios.ios_config:
+        lines:
+          - "vlan {{ vlan_id }}"
+          - "name {{ vlan_name }}"
+
+    - name: assign vlan to ports
+      cisco.ios.ios_config:
+        lines: 
+          - "interface range f0/{{ start_port }}-{{ end_port }}"
+          - "switchport mode access"
+          - "switchport access vlan {{ vlan_id }}"
+`
+}
+
   // 2) Write vars.yml
   fs.writeFileSync(VARS_FILE, YAML.stringify(vars), "utf8");
-
-  // 3) Write site.yml (test local)
-//   const siteYml = `---
-// - name: Test local machine
-//   hosts: local
-//   gather_facts: no
-
-//   tasks:
-//     - name: Run echo command
-//       command: echo "Ansible is working"
-//       register: output
-
-//     - name: Show result
-//       debug:
-//         var: output.stdout
-// `;
-
-
-// const siteYml = `---
-// - name: configure dhcp  
-//   hosts: ${req.body.dhcp_user_option.slice(4,req.body.dhcp_user_option.length)}
-//   gather_facts: no
-//   collections:
-//     - cisco.ios
-
-//   tasks:
-//     - name: collect infos
-//       cisco.ios.ios_command:
-//         commands:
-//           - show version
-//           - show ip interface brief
-//           - show ip route summary
-//           - show cdp neighbors
-//           - show spanning-tree summary
-//       register: show_output
-
-//     - name: Print output
-//       debug:
-//         var: show_output.stdout_lines
-// `;
 
 const siteYml = `---
 - name: configure dhcp  
@@ -113,7 +120,7 @@ const siteYml = `---
     - cisco.ios
   
   vars:
-    dhcp_pool: ${req.body.pool_data}
+    dhcp_pool: ${req.body.pool}
     network_dhcp: ${req.body.network_dhcp}
     default_router: ${req.body.default_router}
     ipDHCPexcluded: ${req.body.ipDHCPexcluded}
@@ -124,10 +131,67 @@ const siteYml = `---
     - name: configure DHCP pool on specific device
       cisco.ios.ios_config:
         parents:
-          - ip dhcp pool {{ dhcp_pool }}
+          - "ip dhcp pool {{ dhcp_pool }}"
         lines:
+          - "network {{ network_dhcp }} 255.255.255.0"
+          - "default-router {{ default_router }}"
+          - "dns-server {{ dns_server }}"
+          - "ip dhcp excluded-address {{ excluded_ip }}"
+  
+- name: configure user and secret
+  hosts: ${req.body.user_create_option.slice(0,req.body.user_create_option.length)}
+  gather_facts: no
+  collections:
+    - cisco.ios
+  
+  vars:
+    user_name: ${req.body.user_name}
+    secret: ${req.body.Secret}
+  
+  tasks:
+    - name: create user and secret on specific device
+      cisco.ios.ios_config:
+        lines:
+          - "username {{ user_name }} privilege 15 secret {{ secret }}"
+  
+- name: configure ospf
+  hosts: ${req.body.ospf_user_option.slice(4,req.body.ospf_user_option.length)}
+  gather_facts: no
+  collections:
+    - cisco.ios
+  
+  vars:
+    ospf_num: ${req.body.ospf_num}
+    network_ospf: ${req.body.network_ospf}
+    wildcard: ${req.body.wildcard}
+    Area: ${req.body.Area}
+  
+  tasks:
+    - name: configure OSPF on specific device
+      cisco.ios.ios_config:
+        lines:
+          - "router ospf {{ ospf_num }}"
+          - "network {{ network_ospf }} {{ wildcard }}"
+          - "area {{ Area }}"
 
-`;
+- name: configure ntp
+  hosts: ${req.body.ntp_user_option.slice(3,req.body.ntp_user_option.length)}
+  gather_facts: no
+  collections:
+    - cisco.ios
+  
+  vars:
+    ntp_server: ${req.body.ntp_server}
+  
+  tasks:
+    - name: configure NTP server on specific device
+      cisco.ios.ios_config:
+        lines:
+          - "ntp server ${req.body.ntp_server}"
+
+${vlanPlay}
+
+`;  
   fs.writeFileSync(PLAYBOOK, siteYml, "utf8");
 
   // 4) Build args + log
