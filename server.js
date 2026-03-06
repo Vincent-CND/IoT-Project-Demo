@@ -19,8 +19,6 @@ const INVENTORY = path.join(__dirname, "inventory.ini");
 const PLAYBOOK = path.join(__dirname, "site.yml");
 const VARS_FILE = path.join(__dirname, "vars.yml");
 
-let firstname = null;
-let lastname = null;
 let message = "success";
 
 const db = new pg.Client({
@@ -42,12 +40,10 @@ app.get("/", (req, res) => { res.render("index.ejs"); })
 app.get("/main", (req,res) => { res.render("main.ejs") }) 
 app.get("/about", (req,res) => { res.render("about.ejs") })
 
-app.post("/deploy", (req, res) => {
+app.post("/deploy",(req, res) => {
   console.log("==> /deploy called");
   console.log("body:", req.body);
   
-  firstname = String(req.body.firstName);
-  lastname = String(req.body.lastName);
 
   const vars = {
     firstName : req.body.firstName,
@@ -214,7 +210,7 @@ ${vlanPlay}
   console.log("ARGS:", args);
 
   // 5) Run ansible
-  execFile(ANSIBLE_CMD, args, { cwd: __dirname }, (err, stdout, stderr) => {
+  execFile(ANSIBLE_CMD, args, { cwd: __dirname }, async (err, stdout, stderr) => {
     console.log("---- STDOUT ----\n", stdout);
     console.log("---- STDERR ----\n", stderr);
 
@@ -229,29 +225,33 @@ ${vlanPlay}
       });
     }
 
+
+    try {
+    const insert = await db.query(
+      `INSERT INTO users_messages(firstname,lastname,message)
+       VALUES($1,$2,$3);`,
+      [req.body.firstName, req.body.lastName, message]
+    );
+
+    console.log("Data inserted to database");
+
+  } catch(dbError) {
+    console.log("DB error:", dbError.message);
+  }
+
+  const userdata = await db.query("SELECT * FROM users_messages;");
+
     return res.json({
       ok: true,
       message: "Deploy success",
       stdout,
       stderr,
+      userdata : userdata.rows
     });
   });
 });
 
-app.get("/fetchdata", async(req,res) => {
-  try{
-    const insertData = await db.query(`INSERT INTO users_messages(firstname,lastname,message) VALUES($1,$2,$3);`,[firstname,lastname,message])
-    const fetchData = await db.query("SELECT * FROM users_messages;")
-    res.json(fetchData.rows)
-  } catch(error){
-    res.status(500).json({error: error.message})
-    console.log(error.message)
-  }
-}
-)
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
-
-

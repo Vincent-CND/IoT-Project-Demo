@@ -1,6 +1,6 @@
 ---
 - name: configure dhcp  
-  hosts: router
+  hosts: L3_switch
   gather_facts: no
   collections:
     - cisco.ios
@@ -25,14 +25,14 @@
           - "ip dhcp excluded-address {{ excluded_ip }}"
   
 - name: configure user and secret
-  hosts: L3_switch
+  hosts: SW1
   gather_facts: no
   collections:
     - cisco.ios
   
   vars:
     user_name: thevinh
-    secret: ahihi
+    secret: ahuhu
   
   tasks:
     - name: create user and secret on specific device
@@ -41,7 +41,7 @@
           - "username {{ user_name }} privilege 15 secret {{ secret }}"
   
 - name: configure ospf
-  hosts: router
+  hosts: L3_switch
   gather_facts: no
   collections:
     - cisco.ios
@@ -62,7 +62,7 @@
           - "network {{ network_ospf }} {{ wildcard }} area {{ Area }}"
 
 - name: configure ntp
-  hosts: L3_switch
+  hosts: router
   gather_facts: no
   collections:
     - cisco.ios
@@ -78,7 +78,7 @@
 
 
 - name: configure vlan
-  hosts: L3_switch,SW1
+  hosts: SW1,SW2
   gather_facts: no
   collections:
     - cisco.ios
@@ -88,8 +88,8 @@
     vlan_name: ahihi
     flag_trunk: true
     flag_assign: true
-    start_port: 13
-    end_port: 17
+    start_port: 5
+    end_port: 9
 
   tasks:
     - name: create vlan

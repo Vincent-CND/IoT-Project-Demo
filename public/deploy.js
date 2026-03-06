@@ -64,47 +64,47 @@ $(document).ready(() => {
   //DHCP Section
   $("#firstName").on("input", function() {
     user_First_name = $(this).val();
-    console.log("First Name:", user_First_name);
+    // console.log("First Name:", user_First_name);
   });
 
   $("#lastName").on("input", function() {
     user_Last_name = $(this).val();
-    console.log("Last Name:", user_Last_name);
+    // console.log("Last Name:", user_Last_name);
   });
 
   $("#lastName").on("input", function() {
     user_Last_name = $(this).val();
-    console.log("Last Name:", user_Last_name);
+    // console.log("Last Name:", user_Last_name);
   });
 
   $("input[name='dhcp']").on("change", function () {
     dhcpUserOption = this.id
-    console.log(dhcpUserOption);
+    // console.log(dhcpUserOption);
   });
 
   $("#pool").on("input" , function() {
     pool = $(this).val();
-    console.log("pool " ,pool);
+    // console.log("pool " ,pool);
   })
 
   $("#Network").on("input" , function() {
     network = $(this).val();
-    console.log("network " ,network);
+    // console.log("network " ,network);
   })
 
   $("#defaultRouter").on("input" , function() {
     defaultRouter = $(this).val();
-    console.log("default Router " , defaultRouter);
+    // console.log("default Router " , defaultRouter);
   })
 
   $("#dnsServer").on("input" , function() {
     dnsServer = $(this).val();
-    console.log("dns Server " , dnsServer);
+    // console.log("dns Server " , dnsServer);
   })
 
   $("#excluded").on("input" , function() { 
     excluded = $(this).val()
-    console.log("excluded" , excluded);
+    // console.log("excluded" , excluded);
   })
 
 
@@ -113,37 +113,37 @@ $(document).ready(() => {
   //VLAN Section
   $("#vlanchooseL3_switch").click( () => {
     vlan_L3 = !vlan_L3;
-    console.log("vlan_L3:", vlan_L3);
+    // console.log("vlan_L3:", vlan_L3);
   })
 
   $("#vlanchooseSW1").click( () => {
     vlan_layer2_sw1 = !vlan_layer2_sw1;
-    console.log("vlan_layer2_sw1:", vlan_layer2_sw1);
+    // console.log("vlan_layer2_sw1:", vlan_layer2_sw1);
   })
 
   $("#vlanchooseSW2").click( () => {
     vlan_layer2_sw2 = !vlan_layer2_sw2;
-    console.log("vlan_layer2_sw2:", vlan_layer2_sw2);
+    // console.log("vlan_layer2_sw2:", vlan_layer2_sw2);
   })
 
   $("#vlanNum").on("input" , function() { 
     vlanNum = $(this).val()
-    console.log("vlan num" , vlanNum);
+    // console.log("vlan num" , vlanNum);
   })
 
   $("#vlanName").on("input" , function() { 
     vlanName = $(this).val()
-    console.log("vlan name" , vlanName);
+    // console.log("vlan name" , vlanName);
   })
 
   $("#assignedCheck").click( () => {
     flagAssign = !flagAssign
     if (flagAssign === true){
-      console.log("got it")
+      // console.log("got it")
 
       $("#startPort").on("change", function() {
       startAssignPort = $(this).val();
-      console.log("Start Port:", startAssignPort);
+      // console.log("Start Port:", startAssignPort);
 
       $("#endPort").on("change", function() {
       endAssignPort = $(this).val();
@@ -178,45 +178,45 @@ $(document).ready(() => {
   //user create
   $("input[name='device']").on("change", function () {
     userCreateOption = this.id
-    console.log(userCreateOption);
+    // console.log(userCreateOption);
   });
   
 
   $("#userName").on("input" , function() { 
     userName = $(this).val()
-    console.log("user name" , userName);
+    // console.log("user name" , userName);
   })
 
   $("#secret").on("input" , function() { 
     secret = $(this).val()
-    console.log("secret" , secret);
+    // console.log("secret" , secret);
   })
 
   //*****/
   //ospf 
   $("input[name='ospf']").on("change", function () {
     ospfUserOption = this.id
-    console.log(ospfUserOption);
+    // console.log(ospfUserOption);
   });
 
   $("#ospfNum").on("input" , function() { 
     ospfNum = $(this).val()
-    console.log("ospf num" , ospfNum);
+    // console.log("ospf num" , ospfNum);
   })
 
   $("#wildcard").on("input" , function() { 
     wildcast = $(this).val()
-    console.log("wildcast" ,  wildcast);
+    // console.log("wildcast" ,  wildcast);
   })
 
   $("#network").on("input" , function() { 
     Network = $(this).val()
-    console.log("network" , Network);
+    // console.log("network" , Network);
   })
 
   $("#area").on("input" , function() { 
     area = $(this).val()
-    console.log("area" , area);
+    // console.log("area" , area);
   })
 
   //****/
@@ -224,12 +224,12 @@ $(document).ready(() => {
 
   $("input[name='ntp']").on("change", function () {
     ntpUserOption = this.id
-    console.log(ntpUserOption);
+    // console.log(ntpUserOption);
   });
 
   $("#ntpserver").on("input" , function() { 
     ntpServer = $(this).val()
-    console.log("ntpserver" , ntpServer);
+    // console.log("ntpserver" , ntpServer);
   })
 
   //****/
@@ -274,9 +274,50 @@ $(document).ready(() => {
   const repliesData = sendData.data
   console.log(repliesData)
 
-  const database = await axios.get("http://localhost:3000/fetchdata")
-  console.log("this is db ", database)
+  localStorage.setItem("deployResult", JSON.stringify(repliesData.userdata));
+  location.reload();
 });
 
+const resultBox = document.getElementById("resultBox");
+
+function renderDatabaseData(userdata) {
+
+  if (!resultBox) return;
+
+  if (!userdata || userdata.length === 0) {
+    resultBox.innerHTML = "<p>No data from database</p>";
+    return;
+  }
+
+  let html = `
+  <table style="width:100%; border-collapse:collapse;">
+    <thead>
+      <tr>
+        <th style="border:1px solid #ccc;padding:6px;">ID</th>
+        <th style="border:1px solid #ccc;padding:6px;">First Name</th>
+        <th style="border:1px solid #ccc;padding:6px;">Last Name</th>
+        <th style="border:1px solid #ccc;padding:6px;">Message</th>
+        <th style="border:1px solid #ccc;padding:6px;">Time</th>
+      </tr>
+    </thead>
+    <tbody>
+  `;
+
+  userdata.forEach(row => {
+    html += `
+      <tr>
+        <td style="border:1px solid #ccc;padding:6px;">${row.id}</td>
+        <td style="border:1px solid #ccc;padding:6px;">${row.firstname}</td>
+        <td style="border:1px solid #ccc;padding:6px;">${row.lastname}</td>
+        <td style="border:1px solid #ccc;padding:6px;">${row.message}</td>
+        <td style="border:1px solid #ccc;padding:6px;">${new Date(row.time).toLocaleString()}</td>
+      </tr>
+    `;
+  });
+
+  html += "</tbody></table>";
+
+  resultBox.innerHTML = html;
+}
 
 })  
