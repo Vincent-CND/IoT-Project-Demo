@@ -1,0 +1,108 @@
+---
+- name: configure dhcp  
+  hosts: router
+  gather_facts: no
+  collections:
+    - cisco.ios
+  
+  vars:
+    dhcp_pool: vlan_10
+    network_dhcp: 192.168.1.0
+    default_router: 192.168.1.1
+    ipDHCPexcluded: 192.168.1.1
+    dns_server: 8.8.8.8
+    excluded_ip : 192.168.1.1
+  
+  tasks:
+    - name: configure DHCP pool on specific device
+      cisco.ios.ios_config:
+        parents:
+          - "ip dhcp pool {{ dhcp_pool }}"
+        lines:
+          - "network {{ network_dhcp }} 255.255.255.0"
+          - "default-router {{ default_router }}"
+          - "dns-server {{ dns_server }}"
+          - "ip dhcp excluded-address {{ excluded_ip }}"
+  
+- name: configure user and secret
+  hosts: L3_switch
+  gather_facts: no
+  collections:
+    - cisco.ios
+  
+  vars:
+    user_name: thevinh
+    secret: ahihi
+  
+  tasks:
+    - name: create user and secret on specific device
+      cisco.ios.ios_config:
+        lines:
+          - "username {{ user_name }} privilege 15 secret {{ secret }}"
+  
+- name: configure ospf
+  hosts: router
+  gather_facts: no
+  collections:
+    - cisco.ios
+  
+  vars:
+    ospf_num: 1
+    network_ospf: 192.168.10.0
+    wildcard: 0.0.0.255
+    Area: 0
+  
+  tasks:
+    - name: configure OSPF on specific device
+      cisco.ios.ios_config:
+        parents:
+          - "ip routing"
+          - "router ospf {{ ospf_num }}"
+        lines:
+          - "network {{ network_ospf }} {{ wildcard }} area {{ Area }}"
+
+- name: configure ntp
+  hosts: L3_switch
+  gather_facts: no
+  collections:
+    - cisco.ios
+  
+  vars:
+    ntp_server: 1.1.1.1
+  
+  tasks:
+    - name: configure NTP server on specific device
+      cisco.ios.ios_config:
+        lines:
+          - "ntp server 1.1.1.1"
+
+
+- name: configure vlan
+  hosts: L3_switch,SW1
+  gather_facts: no
+  collections:
+    - cisco.ios
+
+  vars:
+    vlan_id: 40
+    vlan_name: ahihi
+    flag_trunk: true
+    flag_assign: true
+    start_port: 13
+    end_port: 17
+
+  tasks:
+    - name: create vlan
+      cisco.ios.ios_config:
+        lines:
+          - "vlan {{ vlan_id }}"
+          - "name {{ vlan_name }}"
+
+    - name: assign vlan to ports
+      cisco.ios.ios_config:
+        lines: 
+          - "interface range f0/{{ start_port }}-{{ end_port }}"
+          - "switchport mode access"
+          - "switchport access vlan {{ vlan_id }}"
+
+

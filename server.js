@@ -1,18 +1,10 @@
-//task 1 : dhcp l3 switch or router => option 1 or 2
-//task 2 : vlan ( l3 , 2 l2) => option can choose whatever 
-//task 3 : ospf : l3 or Router => option 1 or 2
-//task 4 : ntp : l3 or Router => option 1 or 2
-//task 5 : save the data to database => have a
-//task 6 : write the ansible for ospf and ntp
-//task 7 : add the ask of username to do the database  
-//task 8 : redirect the user after they have deployed successfully and show the result and db in the end of main page
-
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
 import YAML from "yaml";
 import { execFile } from "child_process";
+import pg from "pg";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,6 +19,20 @@ const INVENTORY = path.join(__dirname, "inventory.ini");
 const PLAYBOOK = path.join(__dirname, "site.yml");
 const VARS_FILE = path.join(__dirname, "vars.yml");
 
+let firstname = null;
+let lastname = null;
+let message = "success";
+
+const db = new pg.Client({
+  user: "postgres",
+  host: "localhost",
+  database: "iotproject",
+  password: "admin123",
+  port: 5432,
+});
+
+db.connect()
+
 // Middleware parse body
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -40,8 +46,12 @@ app.post("/deploy", (req, res) => {
   console.log("==> /deploy called");
   console.log("body:", req.body);
   
+  firstname = String(req.body.firstName);
+  lastname = String(req.body.lastName);
 
   const vars = {
+    firstName : req.body.firstName,
+    lastName : req.body.lastName,
     pool: req.body.pool_data,
     network_dhcp: req.body.network_dhcp,
     default_router: req.body.default_router,
@@ -169,10 +179,11 @@ const siteYml = `---
   tasks:
     - name: configure OSPF on specific device
       cisco.ios.ios_config:
-        lines:
+        parents:
+          - "ip routing"
           - "router ospf {{ ospf_num }}"
-          - "network {{ network_ospf }} {{ wildcard }}"
-          - "area {{ Area }}"
+        lines:
+          - "network {{ network_ospf }} {{ wildcard }} area {{ Area }}"
 
 - name: configure ntp
   hosts: ${req.body.ntp_user_option.slice(3,req.body.ntp_user_option.length)}
@@ -227,6 +238,20 @@ ${vlanPlay}
   });
 });
 
+app.get("/fetchdata", async(req,res) => {
+  try{
+    const insertData = await db.query(`INSERT INTO users_messages(firstname,lastname,message) VALUES($1,$2,$3);`,[firstname,lastname,message])
+    const fetchData = await db.query("SELECT * FROM users_messages;")
+    res.json(fetchData.rows)
+  } catch(error){
+    res.status(500).json({error: error.message})
+    console.log(error.message)
+  }
+}
+)
+
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
+
+

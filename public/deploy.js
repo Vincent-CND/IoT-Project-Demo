@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", function () {
 
   const assignedCheck = document.getElementById("assignedCheck");
@@ -7,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const endPort = document.getElementById("endPort");
 
   // Generate fa0/1 → fa0/24
-  for (let i = 1; i <= 24; i++) {
+  for (let i = 5; i <= 24; i++) {
     const opt1 = document.createElement("option");
     opt1.value = i;
     opt1.textContent = "fa0/" + i;
@@ -58,8 +57,26 @@ $(document).ready(() => {
   let vlan_L3 = false;
   let vlan_layer2_sw1 = false;
   let vlan_layer2_sw2 = false;
+  let user_First_name = null;
+  let user_Last_name = null;
+
 
   //DHCP Section
+  $("#firstName").on("input", function() {
+    user_First_name = $(this).val();
+    console.log("First Name:", user_First_name);
+  });
+
+  $("#lastName").on("input", function() {
+    user_Last_name = $(this).val();
+    console.log("Last Name:", user_Last_name);
+  });
+
+  $("#lastName").on("input", function() {
+    user_Last_name = $(this).val();
+    console.log("Last Name:", user_Last_name);
+  });
+
   $("input[name='dhcp']").on("change", function () {
     dhcpUserOption = this.id
     console.log(dhcpUserOption);
@@ -224,6 +241,8 @@ $(document).ready(() => {
 
   $("#deployBtn").click( async function () {
   let totalConfigData = {
+    firstName : user_First_name,
+    lastName : user_Last_name,
     pool : pool,
     network_dhcp : network,
     default_router : defaultRouter,
@@ -254,6 +273,9 @@ $(document).ready(() => {
   
   const repliesData = sendData.data
   console.log(repliesData)
+
+  const database = await axios.get("http://localhost:3000/fetchdata")
+  console.log("this is db ", database)
 });
 
 
