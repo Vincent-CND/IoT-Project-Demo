@@ -1,5 +1,5 @@
-firstName: Jesica
-lastName: Lu
+firstName: Metropolia
+lastName: University
 network_dhcp: 192.168.1.0
 default_router: 192.168.1.1
 dnsServer: 8.8.8.8

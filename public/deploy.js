@@ -274,6 +274,7 @@ $(document).ready(() => {
   const repliesData = sendData.data
   console.log(repliesData)
 
+  alert("DEPLOYED SUCCESS");
   localStorage.setItem("deployResult", JSON.stringify(repliesData.userdata));
   location.reload();
 });
@@ -318,6 +319,11 @@ function renderDatabaseData(userdata) {
   html += "</tbody></table>";
 
   resultBox.innerHTML = html;
+}
+const savedData = localStorage.getItem("deployResult");
+
+if (savedData) {
+  renderDatabaseData(JSON.parse(savedData));
 }
 
 })  

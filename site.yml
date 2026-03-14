@@ -1,6 +1,6 @@
 ---
 - name: configure dhcp  
-  hosts: L3_switch
+  hosts: router
   gather_facts: no
   collections:
     - cisco.ios
@@ -32,7 +32,7 @@
   
   vars:
     user_name: thevinh
-    secret: ahuhu
+    secret: áddasdas
   
   tasks:
     - name: create user and secret on specific device
@@ -78,7 +78,7 @@
 
 
 - name: configure vlan
-  hosts: SW1,SW2
+  hosts: L3_switch,SW1
   gather_facts: no
   collections:
     - cisco.ios
